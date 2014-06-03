@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html ng-app="dbApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="js/moviedb.js"></script>
+</head>
+<body>
+
+<div id="container">
+
+    <div id="wrapper" ng-controller="dbCtrl">
+
+        <input type="text" ng-model="searchName" placeholder="Enter a name!" ng-keydown="search($event)"/>
+
+        <ul ng-show="hasContent">
+            <li ng-repeat="movie in movieList">
+                {{movie['original_title']}} {{movie['release_date']}}
+            </li>
+        </ul>
+
+    </div>
+
+</div>
+
+</body>
+</html>

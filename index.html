@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script>
+
+
+        var API_KEY = '{Your tmdb api key}';
+
+        $(document).ready(function(){
+
+
+            var $search = $('#search');
+            var $movieList = $('#movies_list');
+
+
+            $search.keydown(function(e){
+                if(e.keyCode==13){
+                    //call getdata
+                    var searchString = $search.val();
+                    console.log(searchString)
+                    getData(searchString)
+                }
+            });
+
+
+            /**
+             * Take an array of movies, sort them according to date
+             * @param arr The movie array
+             */
+            function sortMovies(arr){
+                var sortedarr = arr.sort(function(a,b){
+                    var dateA = new Date(a['release_date']);
+                    var dateB = new Date(b['release_date']);
+                    return dateB - dateA;
+                });
+                return sortedarr;
+            }
+
+
+
+            function getData(str){
+
+                function appendData(movielist){
+                    var sortedList = sortMovies(movielist);
+                    $movieList.empty();
+                    sortedList.forEach(function(movie){
+                        var listItem = $('<li>').append($('<span>').append(movie['original_title'] +
+                        ': '+movie['release_date']));
+                        $movieList.append(listItem)
+                    });
+                }
+
+                console.log(getData.personCache);
+                getData.personCache = getData.personCache || {}; //set to existing cache or create if not exist
+                console.log(getData.personCache)
+
+                if(getData.personCache[str]){
+                    appendData(getData.personCache[str]);
+                    return getData.personCache[str];
+                }
+                else{
+                    var encode = encodeURIComponent(str);
+                    var url = "https://api.themoviedb.org/3/search/person?api_key="+API_KEY+"&query="+encode;
+                    $.ajax(url)
+                            .done(function(results){
+                                var person_id;
+                                person_id = results['results'][0].id;
+                                var url2 = "https://api.themoviedb.org/3/person/"+person_id+"/movie_credits?api_key="+API_KEY;
+                                $.ajax(url2)
+                                        .done(function(results2){
+                                            getData.personCache[str] = results2.cast;
+                                            appendData(getData.personCache[str]);
+                                            console.log(getData.personCache[str]);
+                                            return getData.personCache[str];
+                                        });//ed second ajax call
+                            });//end first ajax call
+                }
+
+            } //end getdata
+
+        });//end docready
+
+    </script>
+
+    <style>
+
+        body{
+            font-family: "Consolas", "Menlo", "Courier", monospace;
+        }
+
+        ul{
+            list-style-type: none;
+        }
+
+        ul > li{
+            padding: .2em;
+            margin: .2em .2em;
+        }
+
+        ul > li span{
+            background-color: #a7ffa4;
+        }
+    </style>
+
+
+</head>
+<body>
+
+<div id="container">
+
+    <div id="wrapper">
+        <div><input id='search' type="text" placeholder="Enter a name..."/></div>
+
+        <ul id="movies_list">
+
+        </ul>
+
+    </div>
+
+</div>
+
+</body>
+</html>
